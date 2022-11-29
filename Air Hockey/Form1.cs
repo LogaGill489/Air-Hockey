@@ -11,6 +11,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+/*
+ * Air Hockey Mini-Game
+ * Logan Gillett
+ * Mr. T
+ * 28.11.22
+ * ICS3U
+ */
+
 namespace Air_Hockey
 {
     public partial class Form1 : Form
@@ -584,7 +592,6 @@ namespace Air_Hockey
             Refresh();
         }
 
-
         //quick reset for each individual player speed
         public void p1Reset()
         {
@@ -601,11 +608,14 @@ namespace Air_Hockey
         //repeatable code for the reset of a game after a goal is scored
         public void gameReset()
         {
+            //adjusts reset variable to track if a new play has been started
             resetPuck = 1;
 
+            //resets each players speed counts to avoid sliding and starting speed boosts
             p1SpeedCounter = 0;
             p2SpeedCounter = 0;
 
+            //resets player positions and pucks x position
             player1.X = 247;
             player1.Y = 150;
 
