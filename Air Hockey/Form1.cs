@@ -72,11 +72,11 @@ namespace Air_Hockey
         bool leftArrowDown = false;
         bool rightArrowDown = false;
 
-        //player and ball speeds
+        //player and puck speeds
         int player1Speed = 4;
         int player2Speed = 4;
-        int ballXSpeed = 6;
-        int ballYSpeed = 6;
+        int puckXSpeed = 6;
+        int puckYSpeed = 6;
 
         //integers for player 1 slide mechanic
         int temp1X = 0;
@@ -106,6 +106,8 @@ namespace Air_Hockey
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
+            //switch block to check for button imputs
+            //adjusts player movement based upon the respective input
             switch (e.KeyCode)
             {
                 case Keys.W:
@@ -137,6 +139,8 @@ namespace Air_Hockey
 
         private void Form1_KeyUp(object sender, KeyEventArgs e)
         {
+            //switch block to check for button releases
+            //stops movement of the respective variable upon release
             switch (e.KeyCode)
             {
                 case Keys.W:
@@ -168,8 +172,6 @@ namespace Air_Hockey
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
-            Graphics g = e.Graphics;
-
             //center line and circle
             e.Graphics.DrawEllipse(blueLinePen, this.Width / 2 - 45, this.Height / 2 - 45, 90, 90);
             e.Graphics.DrawLine(linePen, 0, this.Height / 2, this.Width, this.Height / 2);
@@ -230,7 +232,6 @@ namespace Air_Hockey
                 resetPuck = 0;
             }
 
-
             //setup to store the previous location of the players
             temp1X = player1.X;
             temp1Y = player1.Y;
@@ -242,14 +243,14 @@ namespace Air_Hockey
             player1Speed = p1SpeedCounter / 75 + 4;
             player2Speed = p2SpeedCounter / 75 + 4;
 
-            //move ball 
+            //moves  puck 
             if (resetPuck == 0)
             {
-                puck.X += ballXSpeed;
-                puck.Y += ballYSpeed;
+                puck.X += puckXSpeed;
+                puck.Y += puckYSpeed;
             }
 
-            //move player 1 
+            //moves  player 1 
             if (wDown == true && player1.Y > 5)
             {
                 player1.Y -= player1Speed;
@@ -270,7 +271,7 @@ namespace Air_Hockey
                 player1.X += player1Speed;
             }
 
-            //move player 2 
+            //moves  player 2 
             if (upArrowDown == true && player2.Y > this.Height / 2 + 2)
             {
                 player2.Y -= player2Speed;
@@ -291,67 +292,67 @@ namespace Air_Hockey
                 player2.X += player2Speed;
             }
 
-            //check if ball hit top or bottom wall and change direction if it does 
+            //check if puck hit top or bottom wall and change direction if it does 
             if (puck.Y < 0 || puck.Y > this.Height - puck.Height)
             {
-                ballYSpeed *= -1;  // or: ballYSpeed = -ballYSpeed; 
+                puckYSpeed *= -1;  // or: puckYSpeed = -puckYSpeed; 
             }
 
             //player 1 box intersection mechanics
             if (p1Up.IntersectsWith(puck))
             {
-                ballYSpeed *= -1;
+                puckYSpeed *= -1;
                 puck.Y = player1.Y - puck.Height - 2;
             }
             else if (p1Down.IntersectsWith(puck))
             {
-                ballYSpeed *= -1;
+                puckYSpeed *= -1;
                 puck.Y = player1.Y + puck.Height + 20;
             }
             else if (p1Right.IntersectsWith(puck))
             {
-                ballXSpeed *= -1;
+                puckXSpeed *= -1;
                 puck.X = player1.X + puck.Width + 16;
             }
             else if (p1Left.IntersectsWith(puck))
             {
-                ballXSpeed *= -1;
+                puckXSpeed *= -1;
                 puck.X = player1.X - puck.Width - 2;
             }
 
             //player 2 box intersection mechanics
             if (p2Up.IntersectsWith(puck))
             {
-                ballYSpeed *= -1;
+                puckYSpeed *= -1;
                 puck.Y = player2.Y - puck.Height - 2;
             }
             else if (p2Down.IntersectsWith(puck))
             {
-                ballYSpeed *= -1;
+                puckYSpeed *= -1;
                 puck.Y = player2.Y + puck.Height + 20;
             }
             else if (p2Right.IntersectsWith(puck))
             {
-                ballXSpeed *= -1;
+                puckXSpeed *= -1;
                 puck.X = player2.X + puck.Width + 26;
             }
             else if (p2Left.IntersectsWith(puck))
             {
-                ballXSpeed *= -1;
+                puckXSpeed *= -1;
                 puck.X = player2.X - puck.Width - 2;
             }
 
 
 
-            //check if the ball has hit a side wall
+            //check if the puck has hit a side wall
             if (puck.X > this.Width - puck.Width)
             {
-                ballXSpeed *= -1;
+                puckXSpeed *= -1;
             }
 
             else if (puck.X < 0)
             {
-                ballXSpeed *= -1;
+                puckXSpeed *= -1;
             }
 
             #region player 1 speed increase and slide mechanic
@@ -515,6 +516,7 @@ namespace Air_Hockey
             }
             #endregion
 
+            //checks to see if the puck has hit either goal
             if (puck.IntersectsWith(goal1))
             {
                 gameReset();
@@ -532,18 +534,23 @@ namespace Air_Hockey
                 player1ScoreLabel.Text = $"{player1Score}";
             }
 
+            //checks to see if either player is at 3 points
             if (player1Score >= 3)
             {
+                //stops the timer and displays the win screen
                 gameTimer.Stop();
                 winLabel.Text = "Player 1 Wins";
 
+                //shows the reset button
                 restartButton.Visible = true;
             }
             if (player2Score >= 3)
             {
+                //stops the timer and displays the win screen
                 gameTimer.Stop();
                 winLabel.Text = "Player 2 Wins";
 
+                //shows the reset button
                 restartButton.Visible = true;
             }
 
@@ -591,6 +598,7 @@ namespace Air_Hockey
             p2SpeedCounter = 0;
         }
 
+        //repeatable code for the reset of a game after a goal is scored
         public void gameReset()
         {
             resetPuck = 1;
@@ -609,10 +617,13 @@ namespace Air_Hockey
 
         private void restartButton_Click(object sender, EventArgs e)
         {
+            //disables the reset button until visible again
             restartButton.Visible = false;
 
+            //starts up the timer again
             gameTimer.Start();
 
+            //resets each variable and displayable
             player1Score = 0;
             player2Score = 0;
 
@@ -620,6 +631,7 @@ namespace Air_Hockey
             player2ScoreLabel.Text = "0";
             winLabel.Text = "";
 
+            //necessary for a button press to be used
             this.Focus();
         }
     }
