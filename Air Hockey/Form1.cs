@@ -5,6 +5,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Media;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,31 +19,60 @@ namespace Air_Hockey
         {
             InitializeComponent();
         }
-        Rectangle player1 = new Rectangle(167, 50, 30, 30);
-        Rectangle player2 = new Rectangle(167, 330, 30, 30);
+
+        #region Variables
+
+        //player visual rectangles
+        Rectangle player1 = new Rectangle(247, 150, 30, 30);
+        Rectangle player2 = new Rectangle(247, 420, 30, 30);
+
+        //goal rectangles
         Rectangle goal1Rectangle = new Rectangle(210, 0, 105, 30);
         Rectangle goal2Rectangle = new Rectangle(210, 578, 105, 30);
         Rectangle goal1 = new Rectangle(185, 0, 155, 5);
         Rectangle goal2 = new Rectangle(185, 605, 155, 5);
-        Rectangle puck = new Rectangle(30, 30, 15, 15);
 
+        //player rectangles for ball physics
+        //player 1 rectangles
+        Rectangle p1Up = new Rectangle(0, 0, 32, 4);
+        Rectangle p1Down = new Rectangle(0, 0, 32, 4);
+        Rectangle p1Left = new Rectangle(0, 0, 4, 32);
+        Rectangle p1Right = new Rectangle(0, 0, 4, 32);
+
+        //player 2 rectangles
+        Rectangle p2Up = new Rectangle(0, 0, 32, 4);
+        Rectangle p2Down = new Rectangle(0, 0, 32, 4);
+        Rectangle p2Left = new Rectangle(0, 0, 4, 32);
+        Rectangle p2Right = new Rectangle(0, 0, 4, 32);
+
+        //puck rectangle
+        Rectangle puck = new Rectangle(247, 285, 15, 15);
+
+        //brushes for colouring the puck and players
         Brush blackBrush = new SolidBrush(Color.Black);
         Brush blueBrush = new SolidBrush(Color.SteelBlue);
         Brush redBrush = new SolidBrush(Color.Red);
+        Brush transparentBrush = new SolidBrush(Color.Transparent);
 
+        //pens for colouring the arena
         Pen linePen = new Pen(Color.Red, 3);
         Pen blueLinePen = new Pen(Color.SteelBlue, 3);
         Pen blackPen = new Pen(Color.Black, 5);
 
+        //controls for each individual player
+        //player 1
         bool wDown = false;
         bool sDown = false;
         bool aDown = false;
         bool dDown = false;
+
+        //player 2
         bool upArrowDown = false;
         bool downArrowDown = false;
         bool leftArrowDown = false;
         bool rightArrowDown = false;
 
+        //player and ball speeds
         int player1Speed = 4;
         int player2Speed = 4;
         int ballXSpeed = 6;
@@ -60,8 +90,19 @@ namespace Air_Hockey
         int temptemp2X = 0;
         int temptemp2Y = 0;
 
+        //adjustable speed counter that directly affects the speed of each player among other uses
         int p1SpeedCounter = 0;
         int p2SpeedCounter = 0;
+
+        //scoring variables
+        int resetPuck = 0;
+
+        //player score variables
+        int player1Score = 0;
+        int player2Score = 0;
+
+
+        #endregion
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
@@ -127,6 +168,8 @@ namespace Air_Hockey
 
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
+            Graphics g = e.Graphics;
+
             //center line and circle
             e.Graphics.DrawEllipse(blueLinePen, this.Width / 2 - 45, this.Height / 2 - 45, 90, 90);
             e.Graphics.DrawLine(linePen, 0, this.Height / 2, this.Width, this.Height / 2);
@@ -162,12 +205,32 @@ namespace Air_Hockey
             e.Graphics.FillRectangle(redBrush, player1);
             e.Graphics.FillRectangle(blueBrush, player2);
 
+            //rectangles within the visual rectangle of player 1
+            e.Graphics.FillRectangle(transparentBrush, p1Up);
+            e.Graphics.FillRectangle(transparentBrush, p1Down);
+            e.Graphics.FillRectangle(transparentBrush, p1Left);
+            e.Graphics.FillRectangle(transparentBrush, p1Right);
+
+            //rectangles within the visual rectangle of player 2
+            e.Graphics.FillRectangle(transparentBrush, p2Up);
+            e.Graphics.FillRectangle(transparentBrush, p2Down);
+            e.Graphics.FillRectangle(transparentBrush, p2Left);
+            e.Graphics.FillRectangle(transparentBrush, p2Right);
+
             //puck
             e.Graphics.FillRectangle(blackBrush, puck);
         }
 
         private void gameTimer_Tick(object sender, EventArgs e)
         {
+
+            //puck reset after a goal feature
+            if (resetPuck == 1 && player1.IntersectsWith(puck) || resetPuck == 1 && player2.IntersectsWith(puck))
+            {
+                resetPuck = 0;
+            }
+
+
             //setup to store the previous location of the players
             temp1X = player1.X;
             temp1Y = player1.Y;
@@ -179,11 +242,12 @@ namespace Air_Hockey
             player1Speed = p1SpeedCounter / 75 + 4;
             player2Speed = p2SpeedCounter / 75 + 4;
 
-            label1.Text = $"{p2SpeedCounter}";
-
             //move ball 
-            puck.X += ballXSpeed;
-            puck.Y += ballYSpeed;
+            if (resetPuck == 0)
+            {
+                puck.X += ballXSpeed;
+                puck.Y += ballYSpeed;
+            }
 
             //move player 1 
             if (wDown == true && player1.Y > 5)
@@ -233,32 +297,62 @@ namespace Air_Hockey
                 ballYSpeed *= -1;  // or: ballYSpeed = -ballYSpeed; 
             }
 
-            //check if ball hits either player. If it does change the direction 
-            //and place the ball in front of the player hit 
-            if (player1.IntersectsWith(puck) && ballXSpeed < 0)
+            //player 1 box intersection mechanics
+            if (p1Up.IntersectsWith(puck))
+            {
+                ballYSpeed *= -1;
+                puck.Y = player1.Y - puck.Height - 2;
+            }
+            else if (p1Down.IntersectsWith(puck))
+            {
+                ballYSpeed *= -1;
+                puck.Y = player1.Y + puck.Height + 20;
+            }
+            else if (p1Right.IntersectsWith(puck))
             {
                 ballXSpeed *= -1;
-                puck.X = player1.X + player1.Width;
+                puck.X = player1.X + puck.Width + 16;
+            }
+            else if (p1Left.IntersectsWith(puck))
+            {
+                ballXSpeed *= -1;
+                puck.X = player1.X - puck.Width - 2;
+            }
+
+            //player 2 box intersection mechanics
+            if (p2Up.IntersectsWith(puck))
+            {
+                ballYSpeed *= -1;
+                puck.Y = player2.Y - puck.Height - 2;
+            }
+            else if (p2Down.IntersectsWith(puck))
+            {
+                ballYSpeed *= -1;
+                puck.Y = player2.Y + puck.Height + 20;
+            }
+            else if (p2Right.IntersectsWith(puck))
+            {
+                ballXSpeed *= -1;
+                puck.X = player2.X + puck.Width + 26;
+            }
+            else if (p2Left.IntersectsWith(puck))
+            {
+                ballXSpeed *= -1;
+                puck.X = player2.X - puck.Width - 2;
             }
 
 
-            if (player2.IntersectsWith(puck) && ballXSpeed < 0)
-            {
-                ballXSpeed *= -1;
-                puck.X = player2.X + puck.Width;
-            }
 
             //check if the ball has hit a side wall
             if (puck.X > this.Width - puck.Width)
             {
                 ballXSpeed *= -1;
-
             }
+
             else if (puck.X < 0)
             {
                 ballXSpeed *= -1;
             }
-
 
             #region player 1 speed increase and slide mechanic
 
@@ -423,28 +517,110 @@ namespace Air_Hockey
 
             if (puck.IntersectsWith(goal1))
             {
+                gameReset();
+                puck.Y = 210;
 
+                player2Score++;
+                player2ScoreLabel.Text = $"{player2Score}";
             }
             else if (puck.IntersectsWith(goal2))
             {
+                gameReset();
+                puck.Y = 380;
 
+                player1Score++;
+                player1ScoreLabel.Text = $"{player1Score}";
             }
 
+            if (player1Score >= 3)
+            {
+                gameTimer.Stop();
+                winLabel.Text = "Player 1 Wins";
+
+                restartButton.Visible = true;
+            }
+            if (player2Score >= 3)
+            {
+                gameTimer.Stop();
+                winLabel.Text = "Player 2 Wins";
+
+                restartButton.Visible = true;
+            }
+
+            //Player 1 rectangle followers
+            p1Up.X = player1.X + 1;
+            p1Up.Y = player1.Y - 2;
+
+            p1Down.X = player1.X + 1;
+            p1Down.Y = player1.Y + 28;
+
+            p1Left.X = player1.X - 2;
+            p1Left.Y = player1.Y;
+
+            p1Right.X = player1.X + 29;
+            p1Right.Y = player1.Y;
+
+            //Player 2 rectangle followers
+            p2Up.X = player2.X + 1;
+            p2Up.Y = player2.Y - 2;
+
+            p2Down.X = player2.X + 1;
+            p2Down.Y = player2.Y + 28;
+
+            p2Left.X = player2.X - 2;
+            p2Left.Y = player2.Y;
+
+            p2Right.X = player2.X + 29;
+            p2Right.Y = player2.Y;
+
+            //Refresh of the entire screen
             Refresh();
         }
 
 
         //quick reset for each individual player speed
-            public void p1Reset()
-            {
-                player1Speed = 4;
-                p1SpeedCounter = 0;
-            }
+        public void p1Reset()
+        {
+            player1Speed = 4;
+            p1SpeedCounter = 0;
+        }
 
-            public void p2Reset()
-            {
-                player2Speed = 4;
-                p2SpeedCounter = 0;
-            }
+        public void p2Reset()
+        {
+            player2Speed = 4;
+            p2SpeedCounter = 0;
+        }
+
+        public void gameReset()
+        {
+            resetPuck = 1;
+
+            p1SpeedCounter = 0;
+            p2SpeedCounter = 0;
+
+            player1.X = 247;
+            player1.Y = 150;
+
+            player2.X = 247;
+            player2.Y = 420;
+
+            puck.X = 255;
+        }
+
+        private void restartButton_Click(object sender, EventArgs e)
+        {
+            restartButton.Visible = false;
+
+            gameTimer.Start();
+
+            player1Score = 0;
+            player2Score = 0;
+
+            player1ScoreLabel.Text = "0";
+            player2ScoreLabel.Text = "0";
+            winLabel.Text = "";
+
+            this.Focus();
+        }
     }
 }
