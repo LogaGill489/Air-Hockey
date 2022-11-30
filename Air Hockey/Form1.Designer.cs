@@ -60,7 +60,7 @@
             this.player1ScoreLabel.Font = new System.Drawing.Font("Pyunji R", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.player1ScoreLabel.Location = new System.Drawing.Point(11, 9);
             this.player1ScoreLabel.Name = "player1ScoreLabel";
-            this.player1ScoreLabel.Size = new System.Drawing.Size(30, 35);
+            this.player1ScoreLabel.Size = new System.Drawing.Size(194, 35);
             this.player1ScoreLabel.TabIndex = 2;
             this.player1ScoreLabel.Text = "0";
             this.player1ScoreLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;

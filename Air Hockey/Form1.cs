@@ -31,8 +31,8 @@ namespace Air_Hockey
         #region Variables
 
         //player visual rectangles
-        Rectangle player1 = new Rectangle(247, 150, 30, 30);
-        Rectangle player2 = new Rectangle(247, 420, 30, 30);
+        Rectangle player1 = new Rectangle(237, 150, 50, 50);
+        Rectangle player2 = new Rectangle(237, 420, 50, 50);
 
         //goal rectangles
         Rectangle goal1Rectangle = new Rectangle(210, 0, 105, 30);
@@ -54,7 +54,7 @@ namespace Air_Hockey
         Rectangle p2Right = new Rectangle(0, 0, 4, 32);
 
         //puck rectangle
-        Rectangle puck = new Rectangle(247, 285, 15, 15);
+        Rectangle puck = new Rectangle(243, 285, 20, 20);
 
         //brushes for colouring the puck and players
         Brush blackBrush = new SolidBrush(Color.Black);
@@ -97,6 +97,31 @@ namespace Air_Hockey
         int temp2Y = 0;
         int temptemp2X = 0;
         int temptemp2Y = 0;
+
+        //variables that find the center of each circle
+        int puckCenterX;
+        int puckCenterY;
+
+        int player1CenterX;
+        int player1CenterY;
+
+        int player2CenterX;
+        int player2CenterY;
+
+        float playerRise;
+        float playerRun;
+        float playerTheta;
+
+        float puckRise;
+        float puckRun;
+        float puckTheta;
+
+        float puckGap;
+        float differenceTheta;
+
+        //temporary variable to store the pucks previous position
+        int tempPuckX = 0;
+        int tempPuckY = 0;
 
         //adjustable speed counter that directly affects the speed of each player among other uses
         int p1SpeedCounter = 0;
@@ -209,26 +234,26 @@ namespace Air_Hockey
             e.Graphics.DrawRectangle(blueLinePen, goal2Rectangle);
 
             //players
-            e.Graphics.DrawRectangle(blackPen, player1);
-            e.Graphics.DrawRectangle(blackPen, player2);
+            e.Graphics.DrawEllipse(blackPen, player1);
+            e.Graphics.DrawEllipse(blackPen, player2);
 
-            e.Graphics.FillRectangle(redBrush, player1);
-            e.Graphics.FillRectangle(blueBrush, player2);
+            e.Graphics.FillEllipse(redBrush, player1);
+            e.Graphics.FillEllipse(blueBrush, player2);
 
-            //rectangles within the visual rectangle of player 1
-            e.Graphics.FillRectangle(transparentBrush, p1Up);
-            e.Graphics.FillRectangle(transparentBrush, p1Down);
-            e.Graphics.FillRectangle(transparentBrush, p1Left);
-            e.Graphics.FillRectangle(transparentBrush, p1Right);
+            ////rectangles within the visual rectangle of player 1
+            //e.Graphics.FillRectangle(transparentBrush, p1Up);
+            //e.Graphics.FillRectangle(transparentBrush, p1Down);
+            //e.Graphics.FillRectangle(transparentBrush, p1Left);
+            //e.Graphics.FillRectangle(transparentBrush, p1Right);
 
-            //rectangles within the visual rectangle of player 2
-            e.Graphics.FillRectangle(transparentBrush, p2Up);
-            e.Graphics.FillRectangle(transparentBrush, p2Down);
-            e.Graphics.FillRectangle(transparentBrush, p2Left);
-            e.Graphics.FillRectangle(transparentBrush, p2Right);
+            ////rectangles within the visual rectangle of player 2
+            //e.Graphics.FillRectangle(transparentBrush, p2Up);
+            //e.Graphics.FillRectangle(transparentBrush, p2Down);
+            //e.Graphics.FillRectangle(transparentBrush, p2Left);
+            //e.Graphics.FillRectangle(transparentBrush, p2Right);
 
             //puck
-            e.Graphics.FillRectangle(blackBrush, puck);
+            e.Graphics.FillEllipse(blackBrush, puck);
         }
 
         private void gameTimer_Tick(object sender, EventArgs e)
@@ -246,6 +271,10 @@ namespace Air_Hockey
 
             temp2X = player2.X;
             temp2Y = player2.Y;
+
+            //setup to store previous location of the puck
+            tempPuckX = puck.X;
+            tempPuckY = puck.Y;
 
             //adjusts speed of the player based on the speedcounter the players
             player1Speed = p1SpeedCounter / 75 + 4;
@@ -306,51 +335,147 @@ namespace Air_Hockey
                 puckYSpeed *= -1;  // or: puckYSpeed = -puckYSpeed; 
             }
 
-            //player 1 box intersection mechanics
-            if (p1Up.IntersectsWith(puck))
+            #region old intersection mechanics
+
+            ////player 1 box intersection mechanics
+            //if (p1Up.IntersectsWith(puck))
+            //{
+            //    puckYSpeed *= -1;
+            //    puck.Y = player1.Y - puck.Height - 2;
+            //}
+            //else if (p1Down.IntersectsWith(puck))
+            //{
+            //    puckYSpeed *= -1;
+            //    puck.Y = player1.Y + puck.Height + 20;
+            //}
+            //else if (p1Right.IntersectsWith(puck))
+            //{
+            //    puckXSpeed *= -1;
+            //    puck.X = player1.X + puck.Width + 16;
+            //}
+            //else if (p1Left.IntersectsWith(puck))
+            //{
+            //    puckXSpeed *= -1;
+            //    puck.X = player1.X - puck.Width - 2;
+            //}
+
+            ////player 2 box intersection mechanics
+            //if (p2Up.IntersectsWith(puck))
+            //{
+            //    puckYSpeed *= -1;
+            //    puck.Y = player2.Y - puck.Height - 2;
+            //}
+            //else if (p2Down.IntersectsWith(puck))
+            //{
+            //    puckYSpeed *= -1;
+            //    puck.Y = player2.Y + puck.Height + 20;
+            //}
+            //else if (p2Right.IntersectsWith(puck))
+            //{
+            //    puckXSpeed *= -1;
+            //    puck.X = player2.X + puck.Width + 26;
+            //}
+            //else if (p2Left.IntersectsWith(puck))
+            //{
+            //    puckXSpeed *= -1;
+            //    puck.X = player2.X - puck.Width - 2;
+            //}
+
+            #endregion
+
+            #region new intersection mechanics
+
+            puckCenterX = puck.X + 10;
+            puckCenterY = puck.Y + 10;
+
+            player1CenterX = player1.X + 25;
+            player1CenterY = player1.Y + 25;
+
+            player2CenterX = player2.X + 25;
+            player2CenterY = player2.Y + 25;
+
+            //player 1
+            if (puckCenterX < player1CenterX && puckCenterY < player1CenterY) //top left
             {
-                puckYSpeed *= -1;
-                puck.Y = player1.Y - puck.Height - 2;
+                playerRise = player1CenterY - puck.Y;
+                playerRun = player1CenterX - puck.X;
+
+                puckGap = (playerRise * playerRise) + (playerRun * playerRun);
+
+                if (puckGap < 1225)
+                {
+                    //calulating player theta
+                    playerTheta = playerRise / playerRun;
+                    Math.Atan(playerTheta * Math.PI / 180);
+
+                    player1ScoreLabel.Text = $"{playerTheta}";
+
+                    //calculating puck theta
+                    puckRise = puck.Y - tempPuckY;
+                    puckRun = puck.X - tempPuckX;
+
+                    puckTheta = puckRise / puckRun;
+                    Math.Atan(puckTheta);
+
+                    differenceTheta = playerTheta - puckTheta;
+                    differenceTheta = 180 - differenceTheta;
+
+                    //player1ScoreLabel.Text = $"{differenceTheta}";
+                }
             }
-            else if (p1Down.IntersectsWith(puck))
+            if (puckCenterX > player1CenterX && puckCenterY > player1CenterY) //bottom right
             {
-                puckYSpeed *= -1;
-                puck.Y = player1.Y + puck.Height + 20;
+
             }
-            else if (p1Right.IntersectsWith(puck))
+            if (puckCenterX > player1CenterX && puckCenterY < player1CenterY) //top right
             {
-                puckXSpeed *= -1;
-                puck.X = player1.X + puck.Width + 16;
+
             }
-            else if (p1Left.IntersectsWith(puck))
+            if (puckCenterX < player1CenterX && puckCenterY > player1CenterY) //bottom left
             {
-                puckXSpeed *= -1;
-                puck.X = player1.X - puck.Width - 2;
+
             }
 
-            //player 2 box intersection mechanics
-            if (p2Up.IntersectsWith(puck))
-            {
-                puckYSpeed *= -1;
-                puck.Y = player2.Y - puck.Height - 2;
-            }
-            else if (p2Down.IntersectsWith(puck))
-            {
-                puckYSpeed *= -1;
-                puck.Y = player2.Y + puck.Height + 20;
-            }
-            else if (p2Right.IntersectsWith(puck))
-            {
-                puckXSpeed *= -1;
-                puck.X = player2.X + puck.Width + 26;
-            }
-            else if (p2Left.IntersectsWith(puck))
-            {
-                puckXSpeed *= -1;
-                puck.X = player2.X - puck.Width - 2;
-            }
+            #endregion
 
-
+            #region Side Wall Collision
+            //stops puck from sliding outside of the map
+            if (puck.Y < this.Height / 2)
+            {
+                if (puck.X < 0)
+                {
+                    puck.X += 4;
+                    player1.X += 4;
+                }
+                else if (puck.X > this.Width)
+                {
+                    puck.X -= 4;
+                    player1.X -= 4;
+                }
+                else if (puck.Y < 0)
+                {
+                    puck.Y += 4;
+                    player1.Y += 4;
+                }
+            }
+            else
+            {
+                if (puck.X < 0)
+                {
+                    puck.X += 4;
+                    player2.X += 4;
+                }
+                else if (puck.X > this.Width)
+                {
+                    puck.X -= 4;
+                    player2.X -= 4;
+                }
+                else if (puck.Y > this.Height)
+                {
+                    puck.Y -= 4;
+                    player2.Y -= 4;
+                }
+            }
 
             //check if the puck has hit a side wall
             if (puck.X > this.Width - puck.Width)
@@ -362,6 +487,8 @@ namespace Air_Hockey
             {
                 puckXSpeed *= -1;
             }
+
+            #endregion
 
             #region player 1 speed increase and slide mechanic
 
@@ -524,6 +651,8 @@ namespace Air_Hockey
             }
             #endregion
 
+            #region Goals and Scoring
+
             //checks to see if the puck has hit either goal
             if (puck.IntersectsWith(goal1))
             {
@@ -561,6 +690,8 @@ namespace Air_Hockey
                 //shows the reset button
                 restartButton.Visible = true;
             }
+
+            #endregion
 
             //Player 1 rectangle followers
             p1Up.X = player1.X + 1;
