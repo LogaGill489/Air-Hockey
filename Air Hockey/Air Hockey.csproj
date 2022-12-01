@@ -65,6 +65,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -78,6 +79,24 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\export.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\export %281%29.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\170825__santino-c__sirene-horn.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\export %282%29.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\export %283%29.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\export %284%29.wav" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
